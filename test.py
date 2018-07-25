@@ -1,16 +1,25 @@
 #!/usr/bin/python
 # coding: utf-8
 
+import sys
+import platform
+
+import getopt
+
 import sqlite3
 
-import clr
-clr.AddReference('System.Xml')
-from System.Xml import XmlReader, XmlNodeType, XmlDocument
+implementation = platform.python_implementation()
 
-clr.AddReference('System.Xml.Linq')
-from System.Xml.Linq import *
+if implementation == "IronPython":
+	import clr
 
-from System.IO import TextReader
+	clr.AddReference('System.Xml')
+	from System.Xml import XmlReader, XmlNodeType, XmlDocument
+	
+	clr.AddReference('System.Xml.Linq')
+	from System.Xml.Linq import *
+	
+	from System.IO import TextReader
 
 class PythonFileReader(TextReader):
     def __init__(self, f):
@@ -24,21 +33,6 @@ class PythonFileReader(TextReader):
 def insert_record(conn, key, val):
 	sql = 'INSERT INTO test_table VALUES ( NULL, ?, ? );'
 	conn.execute(sql, [key, val])
-
-database = 'test.db'
-
-conn = sqlite3.connect(database)
-
-sql = "DROP TABLE IF EXISTS test_table;"
-conn.execute(sql)
-
-sql = "CREATE TABLE test_table ( id INTEGER PRIMARY KEY AUTOINCREMENT, key VARCHAR(256), val VARCHAR(256));"
-conn.execute(sql)
-
-conn.commit()
-
-insert_record(conn, 'hoge', 'foo')
-
 
 def dump_records_array(conn):
 	# 配列で取り出す
@@ -57,38 +51,94 @@ def dump_records_name(conn):
 	for row in cur:
 		print(str(row["id"]) + ", " + row["key"] + ", " + row["val"])
 
+def usage():
+	print "Usage : {0}".format(sys.argv[0])
 
-reader = XmlReader.Create(PythonFileReader(open('sample.xml')))
+def main():
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "hvo:", ["help", "version", "output="])
+	except getopt.GetoptError as err:
+		print str(err)
+		sys.exit(2)
+	
+	output = None
+	
+	for o, a in opts:
+		if o == "-v":
+			usage()
+			sys.exit(0)
+		elif o in ("-h", "--help"):
+			usage()
+			sys.exit(0)
+		elif o in ("-o", "--output"):
+			output = a
+		else:
+			assert False, "unknown option"
+	
+	ret = 0
+	
+	if output == None :
+		print "no output option"
+		ret += 1
+	
+	if ret != 0:
+		sys.exit(1)
+	
+	print "connect {0}".format(output)
+	
+	conn = sqlite3.connect(output)
+	
+	sql = "DROP TABLE IF EXISTS test_table;"
+	conn.execute(sql)
+	
+	sql = "CREATE TABLE test_table ( id INTEGER PRIMARY KEY AUTOINCREMENT, key VARCHAR(256), val VARCHAR(256));"
+	conn.execute(sql)
+	
+	conn.commit()
+	
+	insert_record(conn, 'hoge', 'foo')
+	
+	for input in args:
+		print "read {0}".format(input)
+		reader = XmlReader.Create(PythonFileReader(open(input)))
+		
+		while reader.Read():
+			nodetype = reader.NodeType
+			if nodetype == XmlNodeType.Element:
+				name = reader.Name
+				if name == "record":
+					#print "tag is " + reader.Name
+					doc = XElement.Load(reader.ReadSubtree())
+					
+					#print doc.ToString()
+					
+					for node in doc.Descendants("key"):
+						#print "key is " + node.Value
+						key = node.Value
+					for node in doc.Descendants("val"):
+						#print "val is " + node.Value
+						val = node.Value
+					insert_record(conn, key, val)
+					
+			elif nodetype == XmlNodeType.Text:
+				#print reader.Value
+				pass
+			elif nodetype == XmlNodeType.EndElement:
+				name = reader.Name
+				if name == "record":
+					#print "end of " + reader.Name
+					pass
 
-while reader.Read():
-	nodetype = reader.NodeType
-	if nodetype == XmlNodeType.Element:
-		name = reader.Name
-		if name == "record":
-			#print "tag is " + reader.Name
-			doc = XElement.Load(reader.ReadSubtree())
-			print doc.ToString()
-			for node in doc.Descendants("key"):
-				#print "key is " + node.Value
-				key = node.Value
-			for node in doc.Descendants("val"):
-				#print "val is " + node.Value
-				val = node.Value
-			insert_record(conn, key, val)
-			
-	elif nodetype == XmlNodeType.Text:
-		print reader.Value
-	elif nodetype == XmlNodeType.EndElement:
-		name = reader.Name
-		if name == "record":
-			#print "end of " + reader.Name
-			pass
+		reader.Close()
+		#	if reader.IsStartElement():
+		#		print reader.Name
+	
+	conn.commit()
+	
+	dump_records_name(conn)
+	
+	conn.close()
 
-#	if reader.IsStartElement():
-#		print reader.Name
 
-conn.commit()
-
-dump_records_name(conn)
-
-conn.close()
+if __name__ == "__main__":
+	main()

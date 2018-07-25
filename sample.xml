@@ -1,0 +1,21 @@
+<records>
+	<record>
+		<key>aaa</key>
+		<val>bbb</val>
+	</record>
+	
+	<record>
+		<key>ccc</key>
+		<val>ddd</val>
+	</record>
+
+	<record>
+		<key>eee</key>
+		<val>fff</val>
+	</record>
+	
+	<sample>
+		<key>ggg</key>
+		<val>hhh</val>
+	</sample>
+</records>
