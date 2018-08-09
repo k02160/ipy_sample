@@ -6,7 +6,7 @@ import sys
 import getopt
 import json
 
-import codecs
+from pprint import pprint
 
 import clr
 
@@ -19,27 +19,8 @@ from System.Xml.Linq import *
 clr.AddReferenceToFile('Newtonsoft.Json.dll')
 from Newtonsoft.Json import *
 
-clr.AddReference('System.Web.Extensions')
-from System.Web.Script.Serialization import JavaScriptSerializer #since .net 3.5?
-
-from System.IO import TextReader
-
-class PythonFileReader(TextReader):
-    def __init__(self, f):
-        self.f = f
-    def Read(self, buffer, index, count):
-        chars = self.f.read(count).ToCharArray()
-        chars.CopyTo(buffer, index)
-        return len(chars)
-
 def usage():
 	print "Usage : {0}".format(sys.argv[0])
-
-def ToXmlDocument(doc):
-	xmldoc = XmlDocument()
-	reader = doc.CreateReader()
-	xmldoc.Load(reader)
-	return xmldoc
 
 def main():
 	try:
@@ -80,10 +61,21 @@ def main():
 		data = fp_in.read()
 		
 		doc = XDocument().Parse(data)
-		
-		json = JsonConvert.SerializeXNode(doc, Formatting.Indented)
+
 		print doc.ToString().decode('utf-8')
-		print json.ToString().decode('utf-8')
+		
+		# get json string
+		json_str = JsonConvert.SerializeXNode(doc, Formatting.Indented)
+
+		# print json string
+		print json_str.decode('utf-8')
+
+		# convert json string to object
+		json_dict = json.loads(json_str)
+		
+		pprint(json_dict)
+		print "records -> record -> 1 -> key is " + json_dict['records']['record'][1]['key']
+		fp_in.close()
 		
 	fp_out.write("xml test\n")
 	
