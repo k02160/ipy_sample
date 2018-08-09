@@ -7,19 +7,22 @@ import platform
 import getopt
 
 import sqlite3
+import json
 
 implementation = platform.python_implementation()
 
-if implementation == "IronPython":
-	import clr
+if implementation != "IronPython":
+	print 'This script runs only on IronPython'
 
-	clr.AddReference('System.Xml')
-	from System.Xml import XmlReader, XmlNodeType, XmlDocument
-	
-	clr.AddReference('System.Xml.Linq')
-	from System.Xml.Linq import *
-	
-	from System.IO import TextReader
+import clr
+
+clr.AddReference('System.Xml')
+from System.Xml import XmlReader, XmlNodeType, XmlDocument
+
+clr.AddReference('System.Xml.Linq')
+from System.Xml.Linq import *
+
+from System.IO import TextReader
 
 class PythonFileReader(TextReader):
     def __init__(self, f):
@@ -112,12 +115,19 @@ def main():
 					
 					#print doc.ToString()
 					
-					for node in doc.Descendants("key"):
-						#print "key is " + node.Value
-						key = node.Value
-					for node in doc.Descendants("val"):
-						#print "val is " + node.Value
-						val = node.Value
+					# 複数の値を取り出すときは Descendantsを使う。
+					#for node in doc.Descendants("key"):
+					#	key = node.Value
+					#for node in doc.Descendants("val"):
+					#	val = node.Value
+					
+					# 値を1つ取り出すときはElementを使う。
+					# convert utf-8 string to unicode
+					key = unicode(doc.Element("key").Value, 'utf-8')
+					val = unicode(doc.Element("val").Value, 'utf-8')
+
+					
+					print 'key is ' + key
 					insert_record(conn, key, val)
 					
 			elif nodetype == XmlNodeType.Text:
@@ -130,9 +140,7 @@ def main():
 					pass
 
 		reader.Close()
-		#	if reader.IsStartElement():
-		#		print reader.Name
-	
+
 	conn.commit()
 	
 	dump_records_name(conn)

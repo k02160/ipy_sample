@@ -39,7 +39,12 @@ REM ===============================
 :ALL
 ECHO This is all.
 REM CSCRIPT //NOLOGO "%~f0?.wsf" //job:Main
-ipy test.py
+ECHO ipy test.py -o output.db sample.xml
+ipy test.py -o output.db sample.xml
+ECHO ipy read_json.py -o json_test.log input.json
+ipy read_json.py -o json_test.log input.json
+ECHO ipy read_xml.py  -o xml_test.log sample.xml
+ipy read_xml.py  -o xml_test.log sample.xml
 @GOTO :EOF
 
 REM ===============================

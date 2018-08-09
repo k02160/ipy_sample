@@ -1,0 +1,9 @@
+{
+	"hoge" : "foo",
+	"bar"  : "piyo",
+	"array" : [ "a", "b", "c" ],
+	"hash" : {
+		"d" : "e",
+		"f" : "g"
+	}
+}

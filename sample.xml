@@ -18,4 +18,10 @@
 		<key>ggg</key>
 		<val>hhh</val>
 	</sample>
+
+	<record>
+		<key>日本語のテキストです。</key>
+		<val>日本とASCIIが混じったテキストです。</val>
+	</record>
+	
 </records>
