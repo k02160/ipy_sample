@@ -52,7 +52,7 @@ def dump_records_name(conn):
 	cur = conn.cursor()
 	cur.execute(sql)
 	for row in cur:
-		print(str(row["id"]) + ", " + row["key"] + ", " + row["val"])
+		print(str(row["id"]) + ", " + row["key"].decode('utf-8') + ", " + row["val"].decode('utf-8'))
 
 def usage():
 	print "Usage : {0}".format(sys.argv[0])
@@ -122,12 +122,12 @@ def main():
 					#	val = node.Value
 					
 					# 値を1つ取り出すときはElementを使う。
-					# convert utf-8 string to unicode
-					key = unicode(doc.Element("key").Value, 'utf-8')
-					val = unicode(doc.Element("val").Value, 'utf-8')
-
+					# convert ascii string to unicode
+					key = doc.Element("key").Value
+					val = doc.Element("val").Value
 					
-					print 'key is ' + key
+					print 'key is ' + key.decode('utf-8')
+					print 'val is ' + val.decode('utf-8')
 					insert_record(conn, key, val)
 					
 			elif nodetype == XmlNodeType.Text:

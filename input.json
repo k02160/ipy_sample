@@ -2,6 +2,7 @@
 	"hoge" : "foo",
 	"bar"  : "piyo",
 	"array" : [ "a", "b", "c" ],
+	"キー" : "バリュー",
 	"hash" : {
 		"d" : "e",
 		"f" : "g"

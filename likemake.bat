@@ -37,14 +37,42 @@ REM ===============================
 REM === All
 REM ===============================
 :ALL
-ECHO This is all.
-REM CSCRIPT //NOLOGO "%~f0?.wsf" //job:Main
+CALL :DB
+CALL :XML
+CALL :JSON
+CALL :TEXT
+@GOTO :EOF
+
+REM ===============================
+REM === DB
+REM ===============================
+:DB
 ECHO ipy test.py -o output.db sample.xml
 ipy test.py -o output.db sample.xml
-ECHO ipy read_json.py -o json_test.log input.json
-ipy read_json.py -o json_test.log input.json
+@GOTO :EOF
+
+REM ===============================
+REM === Xml
+REM ===============================
+:XML
 ECHO ipy read_xml.py  -o xml_test.log sample.xml
 ipy read_xml.py  -o xml_test.log sample.xml
+@GOTO :EOF
+
+REM ===============================
+REM === Json
+REM ===============================
+:JSON
+ECHO ipy read_json.py -o json_test.log input.json
+ipy read_json.py -o json_test.log input.json
+@GOTO :EOF
+
+REM ===============================
+REM === Text
+REM ===============================
+:TEXT
+ECHO ipy read_text.py  -o text_test.log input.json
+ipy read_text.py  -o text_test.log input.json
 @GOTO :EOF
 
 REM ===============================

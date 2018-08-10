@@ -4,17 +4,6 @@
 import sys
 
 import getopt
-import json
-
-from pprint import pprint
-
-import clr
-
-clr.AddReference('System.Xml.Linq')
-from System.Xml.Linq import XDocument
-
-clr.AddReferenceToFile('Newtonsoft.Json.dll')
-from Newtonsoft.Json import *
 
 def usage():
 	print "Usage : {0}".format(sys.argv[0])
@@ -50,34 +39,22 @@ def main():
 		sys.exit(1)
 	
 	fp_out = open(output, "w")
-	
+
 	for input in args:
-		print("arg : " + input)
-		
 		fp_in = open(input, "r")
-		data = fp_in.read()
+		while 1:
+			line = fp_in.readline().rstrip()
+			if not line:
+				break
+			
+			# ファイルに書き出すときはdecodeしない
+			fp_out.write(line + '\n')
 
-		print data.decode('utf-8')
+			# printのときはutf-8にdecodeする必要がある
+			print "PRINT : " + line.decode('utf-8')
 		
-		doc = XDocument().Parse(data)
-
-		print doc.ToString().decode('utf-8')
-		
-		# get json string
-		json_str = JsonConvert.SerializeXNode(doc, Formatting.Indented)
-
-		# print json string
-		print json_str.decode('utf-8')
-
-		# convert json string to object
-		json_dict = json.loads(json_str)
-		
-		pprint(json_dict)
-		print "records -> record -> 3 -> key is " + json_dict['records']['record'][3]['key'].decode('utf-8')
 		fp_in.close()
 		
-	fp_out.write("xml test\n")
-	
 	fp_out.close()
 
 if __name__ == "__main__":
